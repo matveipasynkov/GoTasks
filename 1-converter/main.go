@@ -68,6 +68,7 @@ func checkSecondCurrency(firstCurrency string) string {
 
 func checkValue() float64 {
 	var result float64
+	var discard string
 	for {
 		fmt.Print("Введите значение (больше 0): ")
 		_, err := fmt.Scan(&result)
@@ -75,5 +76,9 @@ func checkValue() float64 {
 			return result
 		}
 		fmt.Println("Значение введено неверно. Попробуйте ещё раз.")
+		if err == nil {
+			continue
+		}
+		fmt.Scanln(&discard)
 	}
 }
