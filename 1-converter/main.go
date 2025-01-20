@@ -25,19 +25,16 @@ func calculate(value float64, currencyFirst string, currencySecond string) float
 	const usdRub = 103.05
 	const eurRub = usdRub / usdEur
 
-	if currencyFirst == "EUR" && currencySecond == "RUB" {
-		return value * eurRub
-	} else if currencyFirst == "EUR" && currencySecond == "USD" {
-		return value / usdEur
-	} else if currencyFirst == "USD" && currencySecond == "RUB" {
-		return value * usdRub
-	} else if currencyFirst == "USD" && currencySecond == "EUR" {
-		return value * usdEur
-	} else if currencyFirst == "RUB" && currencySecond == "USD" {
-		return value / usdRub
-	} else {
-		return value / eurRub
+	currencies := map[string]float64{
+		"EURRUB": eurRub,
+		"EURUSD": 1 / usdEur,
+		"USDRUB": usdRub,
+		"USDEUR": usdEur,
+		"RUBUSD": 1 / usdRub,
+		"RUBEUR": 1 / eurRub,
 	}
+
+	return currencies[currencyFirst+currencySecond] * value
 }
 
 func checkFirstCurrency() string {
