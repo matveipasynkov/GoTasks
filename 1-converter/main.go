@@ -3,8 +3,21 @@ package main
 import "fmt"
 
 func main() {
+	const usdEur = 0.98
+	const usdRub = 103.05
+	const eurRub = usdRub / usdEur
+
+	currencies := map[string]float64{
+		"EURRUB": eurRub,
+		"EURUSD": 1 / usdEur,
+		"USDRUB": usdRub,
+		"USDEUR": usdEur,
+		"RUBUSD": 1 / usdRub,
+		"RUBEUR": 1 / eurRub,
+	}
+
 	value, currencyFirst, currencySecond := getData()
-	result := calculate(value, currencyFirst, currencySecond)
+	result := calculate(value, currencyFirst, currencySecond, &currencies)
 	fmt.Println("Результат в", currencySecond, "равен:", result)
 }
 
@@ -20,24 +33,8 @@ func getData() (float64, string, string) {
 	return value, currencyFirst, currencySecond
 }
 
-func calculate(value float64, currencyFirst string, currencySecond string) float64 {
-	const usdEur = 0.98
-	const usdRub = 103.05
-	const eurRub = usdRub / usdEur
-
-	if currencyFirst == "EUR" && currencySecond == "RUB" {
-		return value * eurRub
-	} else if currencyFirst == "EUR" && currencySecond == "USD" {
-		return value / usdEur
-	} else if currencyFirst == "USD" && currencySecond == "RUB" {
-		return value * usdRub
-	} else if currencyFirst == "USD" && currencySecond == "EUR" {
-		return value * usdEur
-	} else if currencyFirst == "RUB" && currencySecond == "USD" {
-		return value / usdRub
-	} else {
-		return value / eurRub
-	}
+func calculate(value float64, currencyFirst string, currencySecond string, currencies *map[string]float64) float64 {
+	return (*currencies)[currencyFirst+currencySecond] * value
 }
 
 func checkFirstCurrency() string {
