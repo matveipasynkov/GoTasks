@@ -2,14 +2,25 @@ package storage
 
 import (
 	"3-cli/app/bins"
+	"3-cli/app/file"
 	"encoding/json"
 	"os"
 
 	"github.com/fatih/color"
 )
 
-func SaveBins(bins *bins.BinList, path string) {
-	file, err := os.Create(path)
+type Storage struct {
+	Path string
+}
+
+func NewStorage(newPath string) *Storage {
+	return &Storage{
+		Path: newPath,
+	}
+}
+
+func (storage *Storage) SaveBins(bins *bins.BinList) {
+	file, err := os.Create(storage.Path)
 	if err != nil {
 		color.Red(err.Error())
 		return
@@ -26,8 +37,13 @@ func SaveBins(bins *bins.BinList, path string) {
 	}
 }
 
-func ReadBins(path string) *bins.BinList {
-	bytes, err := os.ReadFile(path)
+func (storage *Storage) ReadBins() *bins.BinList {
+	err := file.CheckJsonType(storage.Path)
+	if err != nil {
+		color.Red("Файл неверного формата или не существует")
+		return nil
+	}
+	bytes, err := os.ReadFile(storage.Path)
 	if err != nil {
 		color.Red(err.Error())
 		return nil
@@ -38,4 +54,8 @@ func ReadBins(path string) *bins.BinList {
 		color.Red(err.Error())
 	}
 	return &readedBins
+}
+
+func (storage *Storage) GetPath() string {
+	return storage.Path
 }
