@@ -6,6 +6,7 @@ import (
 	"3-cli/app/file"
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -35,7 +36,7 @@ type IStorage interface {
 	GetPath() string
 }
 
-func CreateBin(storage IStorage, filename string, binName string) {
+func CreateBin(storage IStorage, filename string, binName string) (*string, error) {
 	config := GetConfig()
 	_, err := file.ReadFile(storage.GetPath())
 	var binList bins.BinList
@@ -47,13 +48,13 @@ func CreateBin(storage IStorage, filename string, binName string) {
 	err = file.CheckJsonType(filename)
 	if err != nil {
 		color.Red(err.Error())
-		return
+		return nil, err
 	}
 	body, _ := file.ReadFile(filename)
 	req, err := http.NewRequest("POST", "https://api.jsonbin.io/v3/b", bytes.NewBuffer(body))
 	if err != nil {
 		color.Red(err.Error())
-		return
+		return nil, err
 	}
 	client := &http.Client{}
 	req.Header = http.Header{
@@ -63,19 +64,19 @@ func CreateBin(storage IStorage, filename string, binName string) {
 	resp, err := client.Do(req)
 	if err != nil {
 		color.Red(err.Error())
-		return
+		return nil, err
 	}
 	defer resp.Body.Close()
 	body, err = io.ReadAll(resp.Body)
 	if err != nil {
 		color.Red(err.Error())
-		return
+		return nil, err
 	}
 	var informationInput inputStruct
 	err = json.Unmarshal(body, &informationInput)
 	if err != nil {
 		color.Red(err.Error())
-		return
+		return nil, err
 	}
 	binList.Bins = append(binList.Bins, bins.Bin{
 		Id:        informationInput.Metadata.Id,
@@ -85,14 +86,15 @@ func CreateBin(storage IStorage, filename string, binName string) {
 	})
 	storage.SaveBins(&binList)
 	color.Green("Запись успешна.")
+	return &informationInput.Metadata.Id, nil
 }
 
-func GetBin(storage IStorage, id string) {
+func GetBin(storage IStorage, id string) error {
 	config := GetConfig()
 	binList := storage.ReadBins()
 	if binList == nil {
 		color.Red("Список бинов не открылся.")
-		return
+		return errors.New("EMPTY_LIST")
 	}
 	checkFlag := false
 	for _, bin := range binList.Bins {
@@ -103,12 +105,12 @@ func GetBin(storage IStorage, id string) {
 	}
 	if !checkFlag {
 		color.Red("Такого бина нет.")
-		return
+		return errors.New("BIN_NOT_EXIST")
 	}
 	req, err := http.NewRequest("GET", "https://api.jsonbin.io/v3/b/"+fmt.Sprint(id), nil)
 	if err != nil {
 		color.Red(err.Error())
-		return
+		return err
 	}
 	client := &http.Client{}
 	req.Header = http.Header{
@@ -118,20 +120,21 @@ func GetBin(storage IStorage, id string) {
 	resp, err := client.Do(req)
 	if err != nil {
 		color.Red(err.Error())
-		return
+		return err
 	}
 	defer resp.Body.Close()
 	bytesList, err := io.ReadAll(resp.Body)
 	color.Green("Получена следующая запись:")
 	color.Green(string(bytesList))
+	return nil
 }
 
-func UpdateBin(storage IStorage, filename string, id string) {
+func UpdateBin(storage IStorage, filename string, id string) error {
 	config := GetConfig()
 	binList := storage.ReadBins()
 	if binList == nil {
 		color.Red("Список бинов не открылся.")
-		return
+		return errors.New("EMPTY_LIST")
 	}
 	checkFlag := false
 	for _, bin := range binList.Bins {
@@ -142,18 +145,18 @@ func UpdateBin(storage IStorage, filename string, id string) {
 	}
 	if !checkFlag {
 		color.Red("Такого бина нет.")
-		return
+		return errors.New("BIN_NOT_EXIST")
 	}
 	err := file.CheckJsonType(filename)
 	if err != nil {
 		color.Red(err.Error())
-		return
+		return err
 	}
 	body, _ := file.ReadFile(filename)
-	req, err := http.NewRequest("PUT", "https://api.jsonbin.io/v3/b", bytes.NewBuffer(body))
+	req, err := http.NewRequest("PUT", "https://api.jsonbin.io/v3/b/"+id, bytes.NewBuffer(body))
 	if err != nil {
 		color.Red(err.Error())
-		return
+		return err
 	}
 	client := &http.Client{}
 	req.Header = http.Header{
@@ -163,21 +166,22 @@ func UpdateBin(storage IStorage, filename string, id string) {
 	resp, err := client.Do(req)
 	if err != nil {
 		color.Red(err.Error())
-		return
+		return err
 	}
 	if resp.StatusCode == 200 {
 		color.Green("Обновление успешно.")
-		return
+		return nil
 	}
 	color.Red("Обновление провалено, ошибка: " + fmt.Sprintln(resp.StatusCode))
+	return errors.New("WRONG_REQUEST")
 }
 
-func DeleteBin(storage IStorage, id string) {
+func DeleteBin(storage IStorage, id string) error {
 	config := GetConfig()
 	binList := storage.ReadBins()
 	if binList == nil {
 		color.Red("Список бинов не открылся.")
-		return
+		return errors.New("EMPTY_LIST")
 	}
 	checkFlag := false
 	for _, bin := range binList.Bins {
@@ -188,12 +192,12 @@ func DeleteBin(storage IStorage, id string) {
 	}
 	if !checkFlag {
 		color.Red("Такого бина нет.")
-		return
+		return errors.New("BIN_NOT_EXIST")
 	}
 	req, err := http.NewRequest("DELETE", "https://api.jsonbin.io/v3/b/"+fmt.Sprint(id), nil)
 	if err != nil {
 		color.Red(err.Error())
-		return
+		return err
 	}
 	client := &http.Client{}
 	req.Header = http.Header{
@@ -203,7 +207,7 @@ func DeleteBin(storage IStorage, id string) {
 	resp, err := client.Do(req)
 	if err != nil {
 		color.Red(err.Error())
-		return
+		return err
 	}
 	if resp.StatusCode == 200 {
 		color.Green("Удаление прошло успешно.")
@@ -214,11 +218,12 @@ func DeleteBin(storage IStorage, id string) {
 				break
 			}
 		}
-		return
+		return nil
 	}
 	body, _ := io.ReadAll(resp.Body)
 	fmt.Println(string(body))
 	color.Red("Удаление провалено, ошибка: " + fmt.Sprintln(resp.StatusCode))
+	return errors.New("WRONG_REQUEST")
 }
 
 func GetList(storage IStorage) {
