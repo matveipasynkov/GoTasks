@@ -12,8 +12,38 @@ import (
 func main() {
 	command := getCommand()
 	numbers := getNumbers()
-	calculation := calculate(numbers, command)
+	calculation := calculateFunc[command](numbers...)
 	fmt.Printf("Результат: %.2f\n", calculation)
+}
+
+var calculateFunc = map[string]func(...float64)float64 {
+	"MED": median,
+	"SUM": sum,
+	"AVG": average, 
+}
+
+func median(numbers ...float64) float64 {
+	if len(numbers)%2 == 0 {
+		return (numbers[(len(numbers)-1)/2] + numbers[(len(numbers)-1)/2+1]) / 2
+	} else {
+		return numbers[(len(numbers)-1)/2]
+	}
+}
+
+func sum(numbers ...float64) float64 {
+	var summary float64 = 0
+	for _, value := range numbers {
+		summary += value
+	}
+	return summary
+}
+
+func average(numbers ...float64) float64 {
+	var summary float64 = 0
+	for _, value := range numbers {
+		summary += value
+	}
+	return summary / float64(len(numbers))
 }
 
 func getCommand() string {
@@ -58,27 +88,5 @@ func getNumbers() []float64 {
 			return numbers[i] < numbers[j]
 		})
 		return numbers
-	}
-}
-
-func calculate(numbers []float64, command string) float64 {
-	if command == "MED" {
-		if len(numbers)%2 == 0 {
-			return (numbers[(len(numbers)-1)/2] + numbers[(len(numbers)-1)/2+1]) / 2
-		} else {
-			return numbers[(len(numbers)-1)/2]
-		}
-	} else if command == "SUM" {
-		var summary float64 = 0
-		for _, value := range numbers {
-			summary += value
-		}
-		return summary
-	} else {
-		var summary float64 = 0
-		for _, value := range numbers {
-			summary += value
-		}
-		return summary / float64(len(numbers))
 	}
 }

@@ -1,0 +1,40 @@
+{
+    "accounts": [
+        {
+            "login": "sdfdsf",
+            "password": "IN@I01Phz%fJ",
+            "url": "https://g.com",
+            "createdAt": "2025-01-28T14:59:29.961314+03:00",
+            "updatedAt": "2025-01-28T14:59:29.961314+03:00"
+        },
+        {
+            "login": "asdasda",
+            "password": "r1yuCjM1VhQy",
+            "url": "https://google.com",
+            "createdAt": "2025-01-28T14:59:45.329403+03:00",
+            "updatedAt": "2025-01-28T14:59:45.329403+03:00"
+        },
+        {
+            "login": "fsddscds",
+            "password": "$Y2Z8ABV0H4S",
+            "url": "http://b.com",
+            "createdAt": "2025-01-28T15:16:58.201678+03:00",
+            "updatedAt": "2025-01-28T15:16:58.201678+03:00"
+        },
+        {
+            "login": "dasdasdsad",
+            "password": "WYucq9cIvhU$",
+            "url": "https://google.com",
+            "createdAt": "2025-01-29T23:20:13.634943+03:00",
+            "updatedAt": "2025-01-29T23:20:13.634943+03:00"
+        },
+        {
+            "login": "login",
+            "password": "password",
+            "url": "https://a.ru",
+            "createdAt": "2025-02-03T16:47:52.645439+03:00",
+            "updatedAt": "2025-02-03T16:47:52.645439+03:00"
+        }
+    ],
+    "updatedAt": "2025-02-03T16:47:52.645445+03:00"
+}
